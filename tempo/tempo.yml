@@ -1,19 +1,24 @@
 server:
   http_listen_port: 3200
+  grpc_listen_port: 9095
 
 compactor:
   compaction:
     compaction_window: 1h
+    max_compaction_objects: 6000000
+    block_retention: 1h
+    retained_blocks: 10
 
 storage:
   trace:
     backend: local
     local:
       path: /var/tempo/traces
+    pool:
+      max_workers: 100
+      queue_depth: 10000
 
 distributor:
-  log_received_spans:
-        enabled: true
   receivers:
     otlp:
       protocols:
@@ -21,3 +26,13 @@ distributor:
           endpoint: "0.0.0.0:4317"
         http:
           endpoint: "0.0.0.0:4318"
+  log_received_spans:
+    enabled: true
+
+ingester:
+  max_block_duration: 5m
+  max_block_bytes: 1073741824
+
+querier:
+  frontend_worker:
+    frontend_address: tempo:9095
